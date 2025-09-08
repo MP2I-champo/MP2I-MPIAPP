@@ -1,7 +1,7 @@
 import { Client, Events } from 'discord.js';
 import logger from '../utils/logger.js';
-import DailyChauveReminder from '../systems/DailyChauveReminder.js';
-import EmploiDuTemps from '../systems/EmploiDuTemps.js';
+import dailyChauveReminder from '../systems/DailyChauveReminder.js';
+import emploiDuTemps from '../systems/EmploiDuTemps.js';
 
 export const name = Events.ClientReady;
 export const once = true;
@@ -10,6 +10,6 @@ export async function execute(client: Client) {
 
     logger.info(`Logged to discord as ${client.user.tag}`);
 
-    DailyChauveReminder.init();
-    await EmploiDuTemps.init();
+    dailyChauveReminder.init();
+    await emploiDuTemps.init();
 }
