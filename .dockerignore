@@ -1,0 +1,7 @@
+.gitignore
+.git
+
+node_modules
+compose.yml
+Dockerfile
+LICENSE
