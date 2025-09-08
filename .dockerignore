@@ -1,6 +1,9 @@
 .gitignore
 .git
 
+params.example.json
+.env.example.json
+.env
 node_modules
 compose.yml
 Dockerfile
