@@ -1,0 +1,32 @@
+{
+    "channels": {
+        "emploiDuTemps": "",
+        "chauve": ""
+    },
+    "emojis": {
+        "chauve": "",
+        "mathTeacher": ""
+    },
+    "mathTeacher": "",
+    "citations": [{ "citation": "citation example", "author": "- citation author" }],
+    "emploiDuTemps": {
+        "A": {
+            "Monday": [{ "name": "course", "start": "08:00", "end": "10:00", "group": "group1/group2/other", "class": "classroom", "color": "display color" }],
+            "Tuesday": [],
+            "Wednesday": [],
+            "Thursday": [],
+            "Friday": [],
+            "Saturday": [],
+            "Sunday": []
+        },
+        "B": {
+            "Monday": [],
+            "Tuesday": [],
+            "Wednesday": [],
+            "Thursday": [],
+            "Friday": [],
+            "Saturday": [],
+            "Sunday": []
+        }
+    }
+}
