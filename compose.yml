@@ -1,0 +1,9 @@
+services:
+    mp2iapp:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: mp2iapp
+        restart: unless-stopped
+        env_file:
+            - .env

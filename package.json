@@ -1,0 +1,25 @@
+{
+    "name": "mp2iapp",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc"
+    },
+    "keywords": [],
+    "type": "module",
+    "author": "cocosilex",
+    "license": "MIT",
+    "packageManager": "pnpm@10.14.0",
+    "dependencies": {
+        "discord.js": "^14.19.3",
+        "luxon": "^3.7.2",
+        "pureimage": "^0.4.18",
+        "typescript": "^5.8.3",
+        "winston": "^3.17.0"
+    },
+    "devDependencies": {
+        "@types/luxon": "^3.7.1",
+        "@types/node": "^24.0.0"
+    }
+}
