@@ -33,8 +33,5 @@ class ExtendedClient extends Client {
     }
 }
 
-const client = new ExtendedClient();
-
-export default client;
-
+export default new ExtendedClient();
 export { ExtendedClient };
