@@ -17,7 +17,7 @@ class DailyChauveReminder {
         const channel = client.channels.cache.get(channelId) as TextChannel;
         if (channel && channel.isTextBased()) {
             await channel.send(`Daily chauve reminder: ${params.emojis.chauve}`);
-            await channel.send(`<:chauve_fuck:${params.emojis.chauve}>`);
+            await channel.send(params.emojis.chauve);
         }
     }
 }

@@ -32,7 +32,7 @@ const DARK_GREEN = '#388e3c';
 const DARK_ORANGE = '#e65100';
 const DARK_GRAY = '#616161';
 const BLACK = '#000000';
-const YELLOW = '#FFD700';
+const YELLOW = '#B8860B';
 const MUD = '#60544c';
 const LIGHT_PURPLE = '#7c4dff';
 
@@ -140,8 +140,7 @@ class EmploiDuTemps {
             const salleText = `Salle : ${course.class}`;
             const salleWidth = ctx.measureText(salleText).width;
             const salleX = blockX + (blockWidth - salleWidth) / 2;
-            ctx.fillText(salleText, salleX, blockY + 54);
-
+           
             let group = '';
             switch (course.group) {
                 case 'group1':
@@ -152,8 +151,12 @@ class EmploiDuTemps {
                     break;
             }
 
-            if (group) {
-                const groupWidth = ctx.measureText(group).width;
+	    if(group && endH - startH === 1) {
+		salleText += ' ' + group;
+            	ctx.fillText(salleText, salleX, blockY + 54);
+	    } else if (group) {
+            	ctx.fillText(salleText, salleX, blockY + 54);
+		const groupWidth = ctx.measureText(group).width;
                 const groupX = blockX + (blockWidth - groupWidth) / 2;
                 ctx.fillText(group, groupX, blockY + 76);
             }
