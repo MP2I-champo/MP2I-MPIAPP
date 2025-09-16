@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
 import { TextChannel, AttachmentBuilder } from 'discord.js';
+import MessageId from '../database/models/MessageId.js';
 import params from '../../params.json' with { type: 'json' };
 import client from '../client.js';
 import * as pureimage from 'pureimage';
@@ -151,14 +152,16 @@ class EmploiDuTemps {
                     break;
             }
 
-	    if(group && endH - startH === 1) {
-		salleText += ' ' + group;
+	        if(group && endH - startH === 1) {
+		        salleText += ' ' + group;
             	ctx.fillText(salleText, salleX, blockY + 54);
-	    } else if (group) {
+	        } else if (group) {
             	ctx.fillText(salleText, salleX, blockY + 54);
-		const groupWidth = ctx.measureText(group).width;
+		        const groupWidth = ctx.measureText(group).width;
                 const groupX = blockX + (blockWidth - groupWidth) / 2;
                 ctx.fillText(group, groupX, blockY + 76);
+            } else {
+            	ctx.fillText(salleText, salleX, blockY + 54);
             }
         });
 
@@ -185,10 +188,12 @@ class EmploiDuTemps {
                 logger.error('EmploiDuTemps: Failed to edit message, sending new one.');
                 const sentMsg = await channel.send({ files: [attachment] });
                 this.embedMessageId = sentMsg.id;
+                await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             }
         } else {
             const sentMsg = await channel.send({ files: [attachment] });
             this.embedMessageId = sentMsg.id;
+            await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             logger.info('EmploiDuTemps: Image message sent.');
         }
     }
