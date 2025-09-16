@@ -1,7 +1,7 @@
 import logger from '../utils/logger.js';
 import sequelize from './database.js';
-import Devoirs from './models/Devoirs';
-import MessageId from './models/MessageId';
+import Devoirs from './models/Devoirs.js';
+import MessageId from './models/MessageId.js';
 
 async function initDatabase() {
     try {
