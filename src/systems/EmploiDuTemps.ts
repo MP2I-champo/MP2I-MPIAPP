@@ -176,6 +176,13 @@ class EmploiDuTemps {
         const channelId = params.channels.emploiDuTemps;
         const channel = client.channels.cache.get(channelId) as TextChannel;
 
+        if (!this.embedMessageId) {
+            const dbEntry = await MessageId.findOne({ where: { name: 'emploiDuTemps' } });
+            if (dbEntry && dbEntry.messageId) {
+                this.embedMessageId = dbEntry.messageId;
+            }
+        }
+
         const imageBuffer = await this.getDayImageBuffer(week, date);
         const attachment = new AttachmentBuilder(imageBuffer, { name: 'emploi_du_temps.png' });
 
