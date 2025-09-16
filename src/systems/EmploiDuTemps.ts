@@ -137,7 +137,7 @@ class EmploiDuTemps {
 
             ctx.font = '18pt DejaVuSans';
             ctx.fillStyle = '#e0e0e0';
-            const salleText = `Salle : ${course.class}`;
+            let salleText = `Salle : ${course.class}`;
             const salleWidth = ctx.measureText(salleText).width;
             const salleX = blockX + (blockWidth - salleWidth) / 2;
            
