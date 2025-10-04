@@ -18,12 +18,14 @@ class DevoirsManager {
         if (!channel || !channel.isTextBased()) return;
         this.guild = (channel as any).guild;
         const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
+
         if (dbEntry && dbEntry.messageId) {
             this.messageId = dbEntry.messageId;
             await this.updateDevoirs();
         } else {
             await this.displayDevoirs();
         }
+
         this.scheduleDailyUpdate();
         logger.info('DevoirsManager: Initialized.');
     }
@@ -90,14 +92,17 @@ class DevoirsManager {
 
     buildEmbed(devoirs: any[]) {
         const embed = new EmbedBuilder().setTitle('Devoirs à faire').setColor(0x3498db);
+        const daysFr = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
         if (devoirs.length === 0) {
             embed.setDescription('Aucun devoir à faire.');
         } else {
             devoirs.forEach((d) => {
                 const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
                 const unix = Math.floor(due.toSeconds());
+                const dayName = daysFr[due.weekday % 7];
+                
                 embed.addFields({
-                    name: `${d.type} - <t:${unix}:d>`,
+                    name: `${d.type} - ${dayName} <t:${unix}:D>`,
                     value: d.description,
                     inline: false,
                 });
