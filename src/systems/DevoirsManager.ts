@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 import MessageId from '../database/models/MessageId.js';
 import params from '../../params.json' with { type: 'json' };
 import client from '../client.js';
+import logger from '../utils/logger.js';
 
 class DevoirsManager {
     private messageId: string | null = null;
@@ -12,6 +13,7 @@ class DevoirsManager {
     private guild: any = null;
 
     public async init() {
+        logger.info('DevoirsManager: Initializing...');
         const channel = client.channels.cache.get(this.channelId!);
         if (!channel || !channel.isTextBased()) return;
         this.guild = (channel as any).guild;
@@ -19,8 +21,9 @@ class DevoirsManager {
         if (dbEntry && dbEntry.messageId) {
             this.messageId = dbEntry.messageId;
         }
-
+        await this.displayDevoirs();
         this.scheduleDailyUpdate();
+        logger.info('DevoirsManager: Initialized.');
     }
 
     async displayDevoirs() {
