@@ -20,8 +20,10 @@ class DevoirsManager {
         const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
         if (dbEntry && dbEntry.messageId) {
             this.messageId = dbEntry.messageId;
+            await this.updateDevoirs();
+        } else {
+            await this.displayDevoirs();
         }
-        await this.displayDevoirs();
         this.scheduleDailyUpdate();
         logger.info('DevoirsManager: Initialized.');
     }
