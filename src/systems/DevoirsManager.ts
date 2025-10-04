@@ -36,6 +36,7 @@ class DevoirsManager {
                 this.messageId = dbEntry.messageId;
             }
         }
+        
         const devoirs = await this.getCurrentDevoirs();
         const embed = this.buildEmbed(devoirs);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(addWorkButton.button);
@@ -91,8 +92,10 @@ class DevoirsManager {
             embed.setDescription('Aucun devoir à faire.');
         } else {
             devoirs.forEach((d) => {
+                const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
+                const unix = Math.floor(due.toSeconds());
                 embed.addFields({
-                    name: `${d.type} - ${d.dueTimestamp}`,
+                    name: `${d.type} - <t:${unix}:d>`,
                     value: d.description,
                     inline: false,
                 });
