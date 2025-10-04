@@ -52,15 +52,19 @@ class DevoirsManager {
             try {
                 const message = await channel.messages.fetch(this.messageId);
                 await message.edit({ embeds: [embed], components: [row] });
+                logger.info(`DevoirsManager: Edited devoirs message (${this.messageId})`);
             } catch {
                 const sent = await channel.send({ embeds: [embed], components: [row] });
                 this.messageId = sent.id;
                 await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
+                logger.info(`DevoirsManager: Sent new devoirs message (${sent.id}), old message not found in channel`);
             }
         } else {
             const sent = await channel.send({ embeds: [embed], components: [row] });
             this.messageId = sent.id;
             await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
+            logger.info(`DevoirsManager: Sent new devoirs message (${sent.id}), old message not found in database`);
+
         }
     }
 
