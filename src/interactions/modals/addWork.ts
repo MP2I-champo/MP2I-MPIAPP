@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
 import DiscordModal from '../../utils/classes/DiscordModal.js';
 import Devoirs from '../../database/models/Devoirs.js';
+import DevoirsManager from '../../systems/DevoirsManager.js';
 
 const modal = new ModalBuilder()
     .setCustomId('addDevoirModal')
@@ -21,6 +22,9 @@ const addDevoirModal = new DiscordModal(modal, true, async (interaction) => {
             dueTimestamp: dueDate,
             type,
         });
+
+        await DevoirsManager.updateDevoirs();
+
         const embed = new EmbedBuilder()
             .setTitle('Nouveau devoir ajouté')
             .addFields({ name: 'Matière', value: type, inline: true }, { name: 'Description', value: description, inline: false }, { name: 'Date limite', value: dueDate, inline: true })
