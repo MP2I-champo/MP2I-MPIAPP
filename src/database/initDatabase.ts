@@ -9,7 +9,7 @@ async function initDatabase() {
         logger.info(`Connected with the database successfully.`);
 
         await MessageId.sync();
-        await Devoirs.sync();
+        await Devoirs.sync({ alter: true });
     } catch (error) {
         logger.error(`Unable to connect to the database:`, error);
     }
