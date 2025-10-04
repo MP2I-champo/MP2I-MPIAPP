@@ -1,4 +1,4 @@
-import { EmbedBuilder, ButtonBuilder, ActionRowBuilder } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, TextChannel } from 'discord.js';
 import Devoirs from '../database/models/Devoirs.js';
 import addWorkButton from '../interactions/buttons/addWork.js';
 import { DateTime } from 'luxon';
@@ -14,13 +14,9 @@ class DevoirsManager {
 
     public async init() {
         logger.info('DevoirsManager: Initializing...');
-        const channel = client.channels.cache.get(this.channelId!);
-        if (!channel || !channel.isTextBased()) return;
-        this.guild = (channel as any).guild;
-        const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
-        if (dbEntry && dbEntry.messageId) {
-            this.messageId = dbEntry.messageId;
-        }
+        const channel = client.channels.cache.get(this.channelId!) as TextChannel;
+        this.guild = channel.guild;
+
         await this.updateDevoirs();
         this.scheduleDailyUpdate();
         logger.info('DevoirsManager: Initialized.');
@@ -28,8 +24,16 @@ class DevoirsManager {
 
     async updateDevoirs() {
         if (!this.channelId || !this.guild) return;
-        const channel = await this.guild.channels.fetch(this.channelId!);
-        if (!channel || !channel.isTextBased()) return;
+
+        if (!this.messageId) {
+            const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
+        
+            if (dbEntry && dbEntry.messageId) {
+                this.messageId = dbEntry.messageId;
+            }   
+        }
+
+        const channel = await this.guild.channels.fetch(this.channelId!) as TextChannel;
 
         const now = DateTime.now().setZone('Europe/Paris');
         const allDevoirs = await Devoirs.findAll();
@@ -43,18 +47,18 @@ class DevoirsManager {
         const devoirs = await this.getCurrentDevoirs();
         const embed = this.buildEmbed(devoirs);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(addWorkButton.button);
-        
+
         if (this.messageId) {
             try {
-                const message = await (channel as any).messages.fetch(this.messageId);
+                const message = await channel.messages.fetch(this.messageId);
                 await message.edit({ embeds: [embed], components: [row] });
             } catch {
-                const sent = await (channel as any).send({ embeds: [embed], components: [row] });
+                const sent = await channel.send({ embeds: [embed], components: [row] });
                 this.messageId = sent.id;
                 await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
             }
         } else {
-            const sent = await (channel as any).send({ embeds: [embed], components: [row] });
+            const sent = await channel.send({ embeds: [embed], components: [row] });
             this.messageId = sent.id;
             await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
         }
