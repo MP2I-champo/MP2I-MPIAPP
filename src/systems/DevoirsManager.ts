@@ -18,39 +18,16 @@ class DevoirsManager {
         if (!channel || !channel.isTextBased()) return;
         this.guild = (channel as any).guild;
         const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
-
         if (dbEntry && dbEntry.messageId) {
             this.messageId = dbEntry.messageId;
-            await this.updateDevoirs();
-        } else {
-            await this.displayDevoirs();
         }
-
+        await this.updateDevoirs();
         this.scheduleDailyUpdate();
         logger.info('DevoirsManager: Initialized.');
     }
 
-    async displayDevoirs() {
-        const channel = client.channels.cache.get(this.channelId!);
-        if (!channel || !channel.isTextBased()) return;
-        this.guild = (channel as any).guild;
-        if (!this.messageId) {
-            const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
-            if (dbEntry && dbEntry.messageId) {
-                this.messageId = dbEntry.messageId;
-            }
-        }
-        
-        const devoirs = await this.getCurrentDevoirs();
-        const embed = this.buildEmbed(devoirs);
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(addWorkButton.button);
-        const sent = await (channel as any).send({ embeds: [embed], components: [row] });
-        this.messageId = sent.id;
-        await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
-    }
-
     async updateDevoirs() {
-        if (!this.channelId || !this.messageId || !this.guild) return;
+        if (!this.channelId || !this.guild) return;
         const channel = await this.guild.channels.fetch(this.channelId!);
         if (!channel || !channel.isTextBased()) return;
 
@@ -66,11 +43,20 @@ class DevoirsManager {
         const devoirs = await this.getCurrentDevoirs();
         const embed = this.buildEmbed(devoirs);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(addWorkButton.button);
-        try {
-            const message = await (channel as any).messages.fetch(this.messageId);
-            await message.edit({ embeds: [embed], components: [row] });
-        } catch {
-            await this.displayDevoirs();
+        
+        if (this.messageId) {
+            try {
+                const message = await (channel as any).messages.fetch(this.messageId);
+                await message.edit({ embeds: [embed], components: [row] });
+            } catch {
+                const sent = await (channel as any).send({ embeds: [embed], components: [row] });
+                this.messageId = sent.id;
+                await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
+            }
+        } else {
+            const sent = await (channel as any).send({ embeds: [embed], components: [row] });
+            this.messageId = sent.id;
+            await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
         }
     }
 
@@ -100,7 +86,7 @@ class DevoirsManager {
                 const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
                 const unix = Math.floor(due.toSeconds());
                 const dayName = daysFr[due.weekday % 7];
-                
+
                 embed.addFields({
                     name: `${d.type} - ${dayName} <t:${unix}:D>`,
                     value: d.description,
