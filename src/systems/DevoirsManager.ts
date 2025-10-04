@@ -19,6 +19,8 @@ class DevoirsManager {
         if (dbEntry && dbEntry.messageId) {
             this.messageId = dbEntry.messageId;
         }
+
+        this.scheduleDailyUpdate();
     }
 
     async displayDevoirs() {
@@ -71,7 +73,7 @@ class DevoirsManager {
             const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
             return due.plus({ hours: 17 }).diff(now, 'hours').hours >= 0;
         });
-        
+
         filtered.sort((a: any, b: any) => {
             const dueA = DateTime.fromFormat(a.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
             const dueB = DateTime.fromFormat(b.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
@@ -108,6 +110,4 @@ class DevoirsManager {
     }
 }
 
-const manager = new DevoirsManager();
-manager.scheduleDailyUpdate();
-export default manager;
+export default new DevoirsManager();
