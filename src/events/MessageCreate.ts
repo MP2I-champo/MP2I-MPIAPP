@@ -6,6 +6,8 @@ import params from "../../params.json" with {type: 'json'}
 export const name = Events.MessageCreate;
 export const once = false;
 export async function execute(message: Message): Promise<void> {
+    if (message.author?.bot) return;
+
     if (containsCitation(message.content)) {
         const foundCitations = getCitationsInMessage(message.content);
         foundCitations.forEach(async (citation) => {

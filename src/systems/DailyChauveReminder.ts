@@ -5,9 +5,13 @@ import logger from '../utils/logger.js';
 import { DateTime } from 'luxon';
 
 class DailyChauveReminder {
+    private initialized: boolean = false;
+
     public async init() {
-        this.scheduleDailyReminder();
-        logger.info('Daily chauve reminder initialized.');
+	if(!this.initialized) {	
+            this.scheduleDailyReminder();
+            logger.info('Daily chauve reminder initialized.');
+	}
     }
 
     private scheduleDailyReminder() {

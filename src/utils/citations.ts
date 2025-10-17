@@ -9,7 +9,8 @@ const citations: Citation[] = params.citations;
 const citationRegex = new RegExp(citations.map((c) => c.citation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'i');
 
 export function containsCitation(message: string): boolean {
-    return citationRegex.test(message);
+    const lower = message.toLowerCase();
+    return citations.some((c) => lower.includes(c.citation.toLowerCase()));
 }
 
 export function getCitationsInMessage(message: string): Citation[] {
