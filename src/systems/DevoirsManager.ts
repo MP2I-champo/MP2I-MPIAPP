@@ -9,12 +9,22 @@ import logger from '../utils/logger.js';
 
 class DevoirsManager {
     private messageId: string | null = null;
-    private channelId: string | null = params.channels.devoirs;
+    private channelId: string = params.channels.devoirs;
     private guild: any = null;
 
     public async init() {
         logger.info('DevoirsManager: Initializing...');
-        const channel = client.channels.cache.get(this.channelId!) as TextChannel;
+        let channel = client.channels.cache.get(this.channelId) as TextChannel | null;
+        if (!channel) {
+            try {
+                channel = (await client.channels.fetch(this.channelId)) as TextChannel | null;
+            } catch (fetchErr) {
+                logger.error(`DevoirsManager: Failed to fetch channel ${this.channelId}: ${String(fetchErr)}`);
+                return;
+            }
+        }
+	
+	channel = channel as TextChannel;
         this.guild = channel.guild;
 
         await this.updateDevoirs();
