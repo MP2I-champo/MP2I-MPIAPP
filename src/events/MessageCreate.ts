@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events, Message } from 'discord.js';
+import { EmbedBuilder, Events, Message, TextChannel } from 'discord.js';
 import { containsCitation, getCitationsInMessage } from '../utils/citations.js';
 import { isMathTeacherCalypse, setMathTeacherCalypse } from '../utils/mathTeacherCalypse.js';
 import params from "../../params.json" with {type: 'json'}
@@ -20,7 +20,7 @@ export async function execute(message: Message): Promise<void> {
     if (isMathTeacherCalypse()) {
         await message.react(params.emojis.mathTeacher).catch(console.error);
     } else {
-        const triggerMathTeacherCalypse = Math.random() < 0.001;
+        const triggerMathTeacherCalypse = Math.random() < 0.003;
         if (triggerMathTeacherCalypse) {
             setMathTeacherCalypse(true);
             await message
@@ -30,7 +30,11 @@ export async function execute(message: Message): Promise<void> {
                 .catch(console.error);
             await message.react(params.emojis.mathTeacher).catch(console.error);
 
-            setTimeout(() => setMathTeacherCalypse(false), 30 * 60 * 1000);
+            setTimeout(async () => {
+		setMathTeacherCalypse(false);
+		const channel = message.channel as TextChannel;
+		await channel.send(`Le temps est écoulé, ${params.mathTeacher} arrête de se manifester... il reviendra peut-être une autre fois...`);
+	    }, 30 * 60 * 1000);
         }
     }
 }
