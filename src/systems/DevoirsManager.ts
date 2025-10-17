@@ -43,7 +43,7 @@ class DevoirsManager {
             }   
         }
 
-        const channel = await this.guild.channels.fetch(this.channelId!) as TextChannel;
+        const channel = await this.guild.channels.fetch(this.channelId) as TextChannel;
 
         const now = DateTime.now().setZone('Europe/Paris');
         const allDevoirs = await Devoirs.findAll();
