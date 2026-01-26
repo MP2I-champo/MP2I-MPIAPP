@@ -150,6 +150,12 @@ class EmploiDuTemps {
                 case 'group2':
                     group = 'Groupe 2';
                     break;
+                case 'opts2i':
+                    group = 'Opt SI';
+                    break;
+                case 'optinfo':
+                    group = 'Opt Info';
+                    break;
             }
 
 	        if(group && endH - startH === 1) {
