@@ -5,6 +5,7 @@ class Devoirs extends Model<InferAttributes<Devoirs>> {
     declare id?: number;
     declare description: string;
     declare type: string;
+    declare author: string;
     declare dueTimestamp: string;
 }
 
@@ -20,6 +21,9 @@ Devoirs.init(
         },
         description: {
             type: DataTypes.STRING(4096),
+        },
+        author: {
+            type: DataTypes.STRING(256),
         },
         dueTimestamp: {
             type: DataTypes.STRING,

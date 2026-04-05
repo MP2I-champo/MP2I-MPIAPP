@@ -112,23 +112,51 @@ class DevoirsManager {
             const emptyState = new TextDisplayBuilder()
                 .setContent('*Aucun devoir à faire.*');
             components.push(emptyState);
-        } else {
-            const container = new ContainerBuilder().setAccentColor(0x3498db);
-
-
-            devoirs.forEach((d) => {
-                const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
-                const unix = Math.floor(due.toSeconds());
-                const dayName = daysFr[due.weekday % 7];
-
-                container.addTextDisplayComponents(
-                        new TextDisplayBuilder().setContent(`**${d.type} - ${dayName} <t:${unix}:D>**\n${d.description}`)
-                    );
-
-            });
-
-            components.push(container);
+            return components;
         }
+        
+        const container = new ContainerBuilder().setAccentColor(0x3498db);
+
+        const groupedByDate = new Map<string, any[]>();
+        for (const d of devoirs) {
+            if (!groupedByDate.has(d.dueTimestamp)) {
+                groupedByDate.set(d.dueTimestamp, []);
+            }
+            groupedByDate.get(d.dueTimestamp)!.push(d);
+        }
+
+        for (const [dateStr, tasksForDate] of groupedByDate.entries()) {
+            const firstTask = tasksForDate[0];
+            const due = DateTime.fromFormat(firstTask.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
+            const unix = Math.floor(due.toSeconds());
+            const dayName = daysFr[due.weekday % 7];
+
+            let dateSectionText = `## 📅 ${dayName} <t:${unix}:D>\n`;
+
+            const groupedByMatiere = new Map<string, any[]>();
+            for (const task of tasksForDate) {
+                const matiere = task.type || 'Autre';
+                if (!groupedByMatiere.has(matiere)) {
+                    groupedByMatiere.set(matiere, []);
+                }
+                groupedByMatiere.get(matiere)!.push(task);
+            }
+
+            for (const [matiere, tasksForMatiere] of groupedByMatiere.entries()) {
+                dateSectionText += `**${matiere}**\n`;
+                for (const task of tasksForMatiere) {
+                    dateSectionText += `> ${task.description}\n`;
+                }
+                dateSectionText += '\n\n';
+            }
+
+            container.addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(dateSectionText.trim())
+            );
+        }
+
+        components.push(container);
+        
         return components;
     }
 

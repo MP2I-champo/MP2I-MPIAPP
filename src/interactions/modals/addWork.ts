@@ -21,6 +21,7 @@ const addDevoirModal = new DiscordModal(modal, true, async (interaction) => {
             description,
             dueTimestamp: dueDate,
             type,
+            author: interaction.user.id
         });
 
         await DevoirsManager.updateDevoirs();
