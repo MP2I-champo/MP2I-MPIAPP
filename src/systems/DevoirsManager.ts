@@ -1,4 +1,4 @@
-import { ButtonBuilder, ActionRowBuilder, TextChannel, TextDisplayBuilder, SeparatorBuilder, SectionBuilder, MessageFlags } from 'discord.js';
+import { ButtonBuilder, ActionRowBuilder, TextChannel, TextDisplayBuilder,SeparatorBuilder, ContainerBuilder, MessageFlags } from 'discord.js';
 import Devoirs from '../database/models/Devoirs.js';
 import addWorkButton from '../interactions/buttons/addWork.js';
 import { DateTime } from 'luxon';
@@ -113,19 +113,21 @@ class DevoirsManager {
                 .setContent('*Aucun devoir à faire.*');
             components.push(emptyState);
         } else {
+            const container = new ContainerBuilder().setAccentColor(0x3498db);
+
+
             devoirs.forEach((d) => {
                 const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
                 const unix = Math.floor(due.toSeconds());
                 const dayName = daysFr[due.weekday % 7];
 
-                const section = new SectionBuilder()
-                    .addTextDisplayComponents(
-                        new TextDisplayBuilder().setContent(`**${d.type} - ${dayName} <t:${unix}:D>**`),
-                        new TextDisplayBuilder().setContent(d.description)
+                container.addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`**${d.type} - ${dayName} <t:${unix}:D>**\n${d.description}`)
                     );
 
-                components.push(section);
             });
+
+            components.push(container);
         }
         return components;
     }
