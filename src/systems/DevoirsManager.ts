@@ -1,4 +1,4 @@
-import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, TextChannel } from 'discord.js';
+import { ButtonBuilder, ActionRowBuilder, TextChannel, TextDisplayBuilder, SeparatorBuilder, SectionBuilder, MessageFlags } from 'discord.js';
 import Devoirs from '../database/models/Devoirs.js';
 import addWorkButton from '../interactions/buttons/addWork.js';
 import { DateTime } from 'luxon';
@@ -55,23 +55,28 @@ class DevoirsManager {
         }
 
         const devoirs = await this.getCurrentDevoirs();
-        const embed = this.buildEmbed(devoirs);
+        const layoutComponents = this.buildMessage(devoirs);
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(addWorkButton.button);
+
+        const finalComponents = [...layoutComponents, row] as any[];
 
         if (this.messageId) {
             try {
                 const message = await channel.messages.fetch(this.messageId);
-                await message.edit({ embeds: [embed], components: [row] });
+                await message.edit({ components: finalComponents, flags : MessageFlags.IsComponentsV2});
+
                 logger.info(`DevoirsManager: Edited devoirs message (${this.messageId})`);
             } catch {
-                const sent = await channel.send({ embeds: [embed], components: [row] });
+                const sent = await channel.send({ components: finalComponents, flags : MessageFlags.IsComponentsV2});
                 this.messageId = sent.id;
+
                 await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
                 logger.info(`DevoirsManager: Sent new devoirs message (${sent.id}), old message not found in channel`);
             }
         } else {
-            const sent = await channel.send({ embeds: [embed], components: [row] });
+            const sent = await channel.send({ components: finalComponents, flags : MessageFlags.IsComponentsV2});
             this.messageId = sent.id;
+
             await MessageId.upsert({ name: 'devoirs', messageId: sent.id });
             logger.info(`DevoirsManager: Sent new devoirs message (${sent.id}), old message not found in database`);
 
@@ -94,25 +99,35 @@ class DevoirsManager {
         return filtered;
     }
 
-    buildEmbed(devoirs: any[]) {
-        const embed = new EmbedBuilder().setTitle('Devoirs à faire').setColor(0x3498db);
+    buildMessage(devoirs: any[]) {
+        const components: any[] = [];
+
+        const header = new TextDisplayBuilder()
+            .setContent('# 📘 Devoirs à faire');
+        components.push(header, new SeparatorBuilder());
+
         const daysFr = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
         if (devoirs.length === 0) {
-            embed.setDescription('Aucun devoir à faire.');
+            const emptyState = new TextDisplayBuilder()
+                .setContent('*Aucun devoir à faire.*');
+            components.push(emptyState);
         } else {
             devoirs.forEach((d) => {
                 const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
                 const unix = Math.floor(due.toSeconds());
                 const dayName = daysFr[due.weekday % 7];
 
-                embed.addFields({
-                    name: `${d.type} - ${dayName} <t:${unix}:D>`,
-                    value: d.description,
-                    inline: false,
-                });
+                const section = new SectionBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`**${d.type} - ${dayName} <t:${unix}:D>**`),
+                        new TextDisplayBuilder().setContent(d.description)
+                    );
+
+                components.push(section);
             });
         }
-        return embed;
+        return components;
     }
 
     scheduleDailyUpdate() {
