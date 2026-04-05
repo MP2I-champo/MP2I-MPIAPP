@@ -145,7 +145,7 @@ class DevoirsManager {
             for (const [matiere, tasksForMatiere] of groupedByMatiere.entries()) {
                 dateSectionText += `**${matiere}**\n`;
                 for (const task of tasksForMatiere) {
-                    dateSectionText += `> ${task.description}\n`;
+                    dateSectionText += `> ${task.description.replaceAll("\n", "\n> ")}\n`;
                 }
                 dateSectionText += '\n\n';
             }
