@@ -4,6 +4,7 @@ import dailyChauveReminder from '../systems/DailyChauveReminder.js';
 import emploiDuTemps from '../systems/EmploiDuTemps.js';
 import initDatabase from '../database/initDatabase.js';
 import buttonHandler from '../handlers/ButtonHandler.js';
+import stringSelectMenuHandler from '../handlers/StringSelectMenuHandler.js';
 import modalHandler from '../handlers/ModalHandler.js';
 import devoirsManager from '../systems/DevoirsManager.js';
 
@@ -18,6 +19,7 @@ export async function execute(client: Client) {
 
     await buttonHandler.registerButtons();
     await modalHandler.registerModals();
+    await stringSelectMenuHandler.registerStringSelectMenus();
 
     dailyChauveReminder.init();
     await emploiDuTemps.init();
