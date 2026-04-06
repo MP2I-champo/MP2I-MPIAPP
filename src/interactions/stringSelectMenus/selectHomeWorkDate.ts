@@ -1,4 +1,4 @@
-import { GuildMember, MessageFlags, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ModalBuilder } from 'discord.js';
+import { GuildMember, MessageFlags, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ModalBuilder, EmbedBuilder } from 'discord.js';
 import { DateTime } from 'luxon';
 import DiscordStringSelectMenu from '../../utils/classes/DiscordStringSelectMenu.js';
 import { buildFreshHmwkModal } from '../modals/addWork.js'; 
@@ -28,6 +28,10 @@ export function buildFreshDateMenu(): StringSelectMenuBuilder {
         .addOptions(options);
 }
 
+const infoEmbed = new EmbedBuilder()
+    .setDescription('Veuillez remplir le formulaire.')
+    .setColor(0x3498db);
+
 const selectBadgeStringSelectMenu = new DiscordStringSelectMenu(
 	new StringSelectMenuBuilder().setCustomId('select_hmwk_date'),
 	false,
@@ -35,6 +39,8 @@ const selectBadgeStringSelectMenu = new DiscordStringSelectMenu(
         const selectedDate = interaction.values[0];
 
         const currentEmbed = interaction.message.embeds[0];
+        await interaction.message.edit({embeds : [infoEmbed]});
+
         let currentType = currentEmbed?.fields.find(f => f.name === 'Matière')?.value || '';
         switch(currentType) {
             case `✅ **Autre**`:

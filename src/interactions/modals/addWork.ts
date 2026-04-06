@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder, MessageFlags } from 'discord.js';
 import DiscordModal from '../../utils/classes/DiscordModal.js';
 import Devoirs from '../../database/models/Devoirs.js';
 import DevoirsManager from '../../systems/DevoirsManager.js';
@@ -54,12 +54,12 @@ const addDevoirModal = new DiscordModal(modal, true, async (interaction) => {
             }
         });
 
-        const updatedEmbed = EmbedBuilder.from(currentEmbed).setTitle("Devoir ajouté").setFields(updatedFields);
+        const updatedEmbed = EmbedBuilder.from(currentEmbed).setTitle("📚 Devoir ajouté").setDescription("Devoir ajouté!").setFields(updatedFields);
 
-        await interaction.reply({ embeds: [updatedEmbed] });
+        await interaction.reply({ embeds: [updatedEmbed], flags: MessageFlags.Ephemeral });
     } catch (err) {
         const errorEmbed = new EmbedBuilder().setTitle('Erreur').setDescription("Erreur lors de l'ajout du devoir.").setColor(0xe74c3c);
-        await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
     }
 });
 
