@@ -12,7 +12,7 @@ const physicsMatiereButton = new DiscordButton(new ButtonBuilder().setCustomId('
 
     const updatedFields = currentEmbed.fields.map(field => {
         if (field.name === 'Matière') {
-            return { name: field.name, value: `✅ **Physics**`, inline: field.inline };
+            return { name: field.name, value: `✅ **Physique**`, inline: field.inline };
         }
             return { name: field.name, value: field.value, inline: field.inline };
     });
