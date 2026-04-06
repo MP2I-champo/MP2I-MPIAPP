@@ -39,7 +39,6 @@ const selectBadgeStringSelectMenu = new DiscordStringSelectMenu(
         const selectedDate = interaction.values[0];
 
         const currentEmbed = interaction.message.embeds[0];
-        await interaction.message.edit({embeds : [infoEmbed]});
 
         let currentType = currentEmbed?.fields.find(f => f.name === 'Matière')?.value || '';
         switch(currentType) {
