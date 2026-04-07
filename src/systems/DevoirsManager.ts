@@ -24,7 +24,7 @@ class DevoirsManager {
             }
         }
 	
-	channel = channel as TextChannel;
+	    channel = channel as TextChannel;
         this.guild = channel.guild;
 
         await this.updateDevoirs();
@@ -36,7 +36,7 @@ class DevoirsManager {
         if (!this.channelId || !this.guild) return;
 
         if (!this.messageId) {
-            const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' } });
+            const dbEntry = await MessageId.findOne({ where: { name: 'devoirs' }, order: [['createdAt', 'DESC']] });
         
             if (dbEntry && dbEntry.messageId) {
                 this.messageId = dbEntry.messageId;
