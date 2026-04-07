@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
 import { TextChannel, AttachmentBuilder } from 'discord.js';
+import MessageId from '../database/models/MessageId.js';
 import params from '../../params.json' with { type: 'json' };
 import client from '../client.js';
 import * as pureimage from 'pureimage';
@@ -137,7 +138,7 @@ class EmploiDuTemps {
 
             ctx.font = '18pt DejaVuSans';
             ctx.fillStyle = '#e0e0e0';
-            const salleText = `Salle : ${course.class}`;
+            let salleText = `Salle : ${course.class}`;
             const salleWidth = ctx.measureText(salleText).width;
             const salleX = blockX + (blockWidth - salleWidth) / 2;
            
@@ -149,16 +150,24 @@ class EmploiDuTemps {
                 case 'group2':
                     group = 'Groupe 2';
                     break;
+                case 'opts2i':
+                    group = 'Opt SI';
+                    break;
+                case 'optinfo':
+                    group = 'Opt Info';
+                    break;
             }
 
-	    if(group && endH - startH === 1) {
-		salleText += ' ' + group;
+	        if(group && endH - startH === 1) {
+		        salleText += ' ' + group;
             	ctx.fillText(salleText, salleX, blockY + 54);
-	    } else if (group) {
+	        } else if (group) {
             	ctx.fillText(salleText, salleX, blockY + 54);
-		const groupWidth = ctx.measureText(group).width;
+		        const groupWidth = ctx.measureText(group).width;
                 const groupX = blockX + (blockWidth - groupWidth) / 2;
                 ctx.fillText(group, groupX, blockY + 76);
+            } else {
+            	ctx.fillText(salleText, salleX, blockY + 54);
             }
         });
 
@@ -173,6 +182,13 @@ class EmploiDuTemps {
         const channelId = params.channels.emploiDuTemps;
         const channel = client.channels.cache.get(channelId) as TextChannel;
 
+        if (!this.embedMessageId) {
+            const dbEntry = await MessageId.findOne({ where: { name: 'emploiDuTemps' } });
+            if (dbEntry && dbEntry.messageId) {
+                this.embedMessageId = dbEntry.messageId;
+            }
+        }
+
         const imageBuffer = await this.getDayImageBuffer(week, date);
         const attachment = new AttachmentBuilder(imageBuffer, { name: 'emploi_du_temps.png' });
 
@@ -185,10 +201,12 @@ class EmploiDuTemps {
                 logger.error('EmploiDuTemps: Failed to edit message, sending new one.');
                 const sentMsg = await channel.send({ files: [attachment] });
                 this.embedMessageId = sentMsg.id;
+                await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             }
         } else {
             const sentMsg = await channel.send({ files: [attachment] });
             this.embedMessageId = sentMsg.id;
+            await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             logger.info('EmploiDuTemps: Image message sent.');
         }
     }

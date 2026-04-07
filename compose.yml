@@ -7,3 +7,16 @@ services:
         restart: unless-stopped
         env_file:
             - .env
+    postgres:
+        image: postgres:15
+        container_name: postgres
+        restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
