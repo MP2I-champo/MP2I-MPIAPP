@@ -86,12 +86,12 @@ class DevoirsManager {
     async getCurrentDevoirs() {
         const now = DateTime.now().setZone('Europe/Paris');
         const devoirs = await Devoirs.findAll();
-        const filtered = devoirs.filter((d: any) => {
+        const filtered = devoirs.filter((d: Devoirs) => {
             const due = DateTime.fromFormat(d.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
             return due.plus({ hours: 17 }).diff(now, 'hours').hours >= 0;
         });
 
-        filtered.sort((a: any, b: any) => {
+        filtered.sort((a: Devoirs, b: Devoirs) => {
             const dueA = DateTime.fromFormat(a.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
             const dueB = DateTime.fromFormat(b.dueTimestamp, 'dd/MM/yyyy', { zone: 'Europe/Paris' });
             return dueA.toMillis() - dueB.toMillis();
@@ -99,7 +99,7 @@ class DevoirsManager {
         return filtered;
     }
 
-    buildMessage(devoirs: any[]) {
+    buildMessage(devoirs: Devoirs[]) {
         const components: any[] = [];
 
         const header = new TextDisplayBuilder()
@@ -110,14 +110,14 @@ class DevoirsManager {
 
         if (devoirs.length === 0) {
             const emptyState = new TextDisplayBuilder()
-                .setContent('*Aucun devoir à faire.*');
+                .setContent('**Aucun devoir à faire.**');
             components.push(emptyState);
             return components;
         }
         
         const container = new ContainerBuilder().setAccentColor(0x3498db);
 
-        const groupedByDate = new Map<string, any[]>();
+        const groupedByDate = new Map<string, Devoirs[]>();
         for (const d of devoirs) {
             if (!groupedByDate.has(d.dueTimestamp)) {
                 groupedByDate.set(d.dueTimestamp, []);
@@ -133,7 +133,7 @@ class DevoirsManager {
 
             let dateSectionText = `## 📅 ${dayName} <t:${unix}:D>\n`;
 
-            const groupedByMatiere = new Map<string, any[]>();
+            const groupedByMatiere = new Map<string, Devoirs[]>();
             for (const task of tasksForDate) {
                 const matiere = task.type || 'Autre';
                 if (!groupedByMatiere.has(matiere)) {
