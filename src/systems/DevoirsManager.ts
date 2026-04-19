@@ -147,7 +147,7 @@ class DevoirsManager {
                 for (const task of tasksForMatiere) {
                     dateSectionText += `> ${task.description.replaceAll("\n", "\n> ")}\n`;
                 }
-                dateSectionText += '\n\n';
+                dateSectionText += '\n';
             }
 
             container.addTextDisplayComponents(
