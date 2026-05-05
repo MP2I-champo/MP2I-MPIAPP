@@ -282,7 +282,7 @@ class EmploiDuTemps {
         const channel = client.channels.cache.get(channelId) as TextChannel;
 
         if(params.weekMessage) {
-            const weekBuffer = await EmploiDuTemps.getWeekImageBuffer('A');
+            const weekBuffer = await this.getWeekImageBuffer('A');
             const attachment = new AttachmentBuilder(weekBuffer, { name: 'week_schedule.png' });
             channel.send({ files: [attachment] });
         }
