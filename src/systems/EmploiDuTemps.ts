@@ -178,9 +178,114 @@ class EmploiDuTemps {
         return Buffer.concat(chunks);
     }
 
+    public async getWeekImageBuffer(week: WeekType): Promise<Buffer> {
+        const daysToDisplay: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const dayNamesFr: { [key in DayOfWeek]: string } = {
+            Monday: 'Lundi', Tuesday: 'Mardi', Wednesday: 'Mercredi',
+            Thursday: 'Jeudi', Friday: 'Vendredi', Saturday: 'Samedi', Sunday: 'Dimanche',
+        };
+
+        // Layout Constants
+        const startHour = 8;
+        const endHour = 19;
+        const hourHeight = 60;
+        const leftMargin = 100;
+        const dayWidth = 300; 
+        const headerHeight = 100;
+        const width = leftMargin + (dayWidth * daysToDisplay.length) + 40;
+        const height = headerHeight + (endHour - startHour) * hourHeight + 40;
+
+        const img = pureimage.make(width, height);
+        const ctx = img.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#23272a';
+        ctx.fillRect(0, 0, width, height);
+
+        // Header Title
+        ctx.font = '40pt DejaVuSans';
+        ctx.fillStyle = '#fff';
+        const titleText = `Emploi du Temps - Semaine ${week}`;
+        ctx.fillText(titleText, leftMargin, 60);
+
+        // Draw Time Axis (Hours)
+        ctx.font = '18pt DejaVuSans';
+        ctx.fillStyle = '#b9bbbe';
+        for (let h = startHour; h <= endHour; h++) {
+            const y = headerHeight + (h - startHour) * hourHeight;
+            ctx.fillText(`${h}:00`, 20, y + 8);
+
+            // Horizontal grid line
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, y);
+            ctx.lineTo(width - 40, y);
+            ctx.stroke();
+        }
+
+        // Draw Each Day
+        daysToDisplay.forEach((day, dayIdx) => {
+            const colX = leftMargin + (dayIdx * dayWidth);
+            const courses = this.getCourses(week, day);
+
+            // Column Header (Day Name)
+            ctx.font = '22pt DejaVuSans';
+            ctx.fillStyle = '#fff';
+            const dayText = dayNamesFr[day];
+            const dayTextWidth = ctx.measureText(dayText).width;
+            ctx.fillText(dayText, colX + (dayWidth - dayTextWidth) / 2, headerHeight - 20);
+
+            // Vertical separator
+            ctx.strokeStyle = '#444851';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(colX, headerHeight);
+            ctx.lineTo(colX, height - 40);
+            ctx.stroke();
+
+            // Draw Courses for this day
+            courses.forEach((course) => {
+                const [startH, startM] = course.start.split(':').map(Number);
+                const [endH, endM] = course.end.split(':').map(Number);
+
+                const blockY = headerHeight + (startH + startM / 60 - startHour) * hourHeight;
+                const blockHeight = (endH + endM / 60 - (startH + startM / 60)) * hourHeight;
+
+                // Course Box
+                ctx.fillStyle = course.color;
+                ctx.fillRect(colX + 5, blockY, dayWidth - 10, blockHeight);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(colX + 5, blockY, dayWidth - 10, blockHeight);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '14pt DejaVuSans';
+                ctx.fillText(course.name, colX + 15, blockY + 25);
+
+                ctx.font = '12pt DejaVuSans';
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fillText(course.class, colX + 15, blockY + 45);
+            });
+        });
+
+        // Export to Buffer
+        const stream = new PassThrough();
+        const chunks: Buffer[] = [];
+        stream.on('data', (chunk) => chunks.push(chunk));
+        await pureimage.encodePNGToStream(img, stream);
+        return Buffer.concat(chunks);
+    }
+
     public async sendOrUpdateDayImage(week: WeekType, date: Date) {
         const channelId = params.channels.emploiDuTemps;
         const channel = client.channels.cache.get(channelId) as TextChannel;
+
+        if(params.weekMessage) {
+            const weekBuffer = await EmploiDuTemps.getWeekImageBuffer('A');
+            const attachment = new AttachmentBuilder(weekBuffer, { name: 'week_schedule.png' });
+            channel.send({ files: [attachment] });
+        }
 
         if (!this.embedMessageId) {
             const dbEntry = await MessageId.findOne({ where: { name: 'emploiDuTemps' } });
