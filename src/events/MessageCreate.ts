@@ -20,7 +20,7 @@ export async function execute(message: Message): Promise<void> {
     if (isMathTeacherCalypse()) {
         await message.react(params.emojis.mathTeacher).catch(console.error);
     } else {
-        const triggerMathTeacherCalypse = Math.random() < 0.0001;
+        const triggerMathTeacherCalypse = Math.random() < 1 / 6666;
         if (triggerMathTeacherCalypse) {
             setMathTeacherCalypse(true);
             await message
