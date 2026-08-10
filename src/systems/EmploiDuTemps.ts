@@ -38,7 +38,8 @@ const MUD = '#60544c';
 const LIGHT_PURPLE = '#7c4dff';
 
 class EmploiDuTemps {
-    private embedMessageId: string | null = null;
+    private dailyEmbedMessageId: string | null = null;
+    private weeklyEmbedMessageId : string | null = null;
     private schedule: Schedule = params.emploiDuTemps;
 
     public async getDayImageBuffer(week: WeekType, date: Date): Promise<Buffer> {
@@ -60,7 +61,6 @@ class EmploiDuTemps {
         const monthNamesFr = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
         const monthName = monthNamesFr[date.getMonth()];
 
-        // Time schedule settings
         const startHour = 8;
         const endHour = 19;
         const hourHeight = 60;
@@ -82,7 +82,7 @@ class EmploiDuTemps {
         const titleX = (width - titleWidth) / 2;
         ctx.fillText(titleText, titleX, 50);
 
-        // Draw time axis
+        // Time axis
         ctx.strokeStyle = '#444851';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -185,7 +185,6 @@ class EmploiDuTemps {
             Thursday: 'Jeudi', Friday: 'Vendredi', Saturday: 'Samedi', Sunday: 'Dimanche',
         };
 
-        // Layout Constants
         const startHour = 8;
         const endHour = 19;
         const hourHeight = 60;
@@ -208,14 +207,13 @@ class EmploiDuTemps {
         const titleText = `Emploi du Temps - Semaine ${week}`;
         ctx.fillText(titleText, leftMargin, 60);
 
-        // Draw Time Axis (Hours)
+        // Time Axis
         ctx.font = '18pt DejaVuSans';
         ctx.fillStyle = '#b9bbbe';
         for (let h = startHour; h <= endHour; h++) {
             const y = headerHeight + (h - startHour) * hourHeight;
             ctx.fillText(`${h}:00`, 20, y + 8);
 
-            // Horizontal grid line
             ctx.strokeStyle = '#444';
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -224,7 +222,7 @@ class EmploiDuTemps {
             ctx.stroke();
         }
 
-        // Draw Each Day
+        // Days
         daysToDisplay.forEach((day, dayIdx) => {
             const colX = leftMargin + (dayIdx * dayWidth);
             const courses = this.getCourses(week, day);
@@ -269,7 +267,6 @@ class EmploiDuTemps {
             });
         });
 
-        // Export to Buffer
         const stream = new PassThrough();
         const chunks: Buffer[] = [];
         stream.on('data', (chunk) => chunks.push(chunk));
@@ -277,42 +274,66 @@ class EmploiDuTemps {
         return Buffer.concat(chunks);
     }
 
-    public async sendOrUpdateDayImage(week: WeekType, date: Date) {
+    public async sendOrUpdateImages(week: WeekType, date: Date) {
         const channelId = params.channels.emploiDuTemps;
         const channel = client.channels.cache.get(channelId) as TextChannel;
 
-        if(params.weekMessage) {
-            const weekBuffer = await this.getWeekImageBuffer('A');
-            const attachment = new AttachmentBuilder(weekBuffer, { name: 'week_schedule.png' });
-            channel.send({ files: [attachment] });
-        }
-
-        if (!this.embedMessageId) {
+        if (!this.dailyEmbedMessageId) {
             const dbEntry = await MessageId.findOne({ where: { name: 'emploiDuTemps' } });
             if (dbEntry && dbEntry.messageId) {
-                this.embedMessageId = dbEntry.messageId;
+                this.dailyEmbedMessageId = dbEntry.messageId;
             }
         }
 
         const imageBuffer = await this.getDayImageBuffer(week, date);
         const attachment = new AttachmentBuilder(imageBuffer, { name: 'emploi_du_temps.png' });
 
-        if (this.embedMessageId) {
+        if (this.dailyEmbedMessageId) {
             try {
-                const message = await channel.messages.fetch(this.embedMessageId);
+                const message = await channel.messages.fetch(this.dailyEmbedMessageId);
                 await message.edit({ files: [attachment], content: '' });
                 logger.info('EmploiDuTemps: Image message updated.');
             } catch (err) {
                 logger.error('EmploiDuTemps: Failed to edit message, sending new one.');
                 const sentMsg = await channel.send({ files: [attachment] });
-                this.embedMessageId = sentMsg.id;
+                this.dailyEmbedMessageId = sentMsg.id;
                 await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             }
         } else {
             const sentMsg = await channel.send({ files: [attachment] });
-            this.embedMessageId = sentMsg.id;
+            this.dailyEmbedMessageId = sentMsg.id;
             await MessageId.upsert({ name: 'emploiDuTemps', messageId: sentMsg.id });
             logger.info('EmploiDuTemps: Image message sent.');
+        }
+
+        if(date.getDay() === 0) {
+            if (!this.weeklyEmbedMessageId) {
+                const dbEntry = await MessageId.findOne({ where: { name: 'emploiDuTempsWeek' } });
+                if (dbEntry && dbEntry.messageId) {
+                this.weeklyEmbedMessageId = dbEntry.messageId;
+                }
+            }
+
+            const imageBuffer = await this.getWeekImageBuffer(week);
+            const attachment = new AttachmentBuilder(imageBuffer, { name: 'emploi_du_temps.png' });
+
+            if (this.weeklyEmbedMessageId) {
+                try {
+                    const message = await channel.messages.fetch(this.weeklyEmbedMessageId);
+                    await message.edit({ files: [attachment], content: '' });
+                    logger.info('EmploiDuTempsWeek: Image message updated.');
+                } catch (err) {
+                    logger.error('EmploiDuTempsWeek: Failed to edit message, sending new one.');
+                    const sentMsg = await channel.send({ files: [attachment] });
+                    this.weeklyEmbedMessageId = sentMsg.id;
+                    await MessageId.upsert({ name: 'emploiDuTempsWeek', messageId: sentMsg.id });
+                }
+            } else {
+                const sentMsg = await channel.send({ files: [attachment] });
+                this.weeklyEmbedMessageId = sentMsg.id;
+                await MessageId.upsert({ name: 'emploiDuTempsWeek', messageId: sentMsg.id });
+                logger.info('EmploiDuTempsWeek: Image message sent.');
+            }
         }
     }
 
@@ -323,7 +344,7 @@ class EmploiDuTemps {
         const tomorrow = new Date(dtParis.year, dtParis.month - 1, dtParis.day);
         const currentWeek: WeekType = this.getCurrentWeekTypeForDate(tomorrow);
 
-        await this.sendOrUpdateDayImage(currentWeek, tomorrow);
+        await this.sendOrUpdateImages(currentWeek, tomorrow);
 
         this.scheduleDailyUpdate();
     }
@@ -350,9 +371,10 @@ class EmploiDuTemps {
         const dtParis = DateTime.now().setZone('Europe/Paris').plus({ days: 1 });
         const tomorrow = new Date(dtParis.year, dtParis.month - 1, dtParis.day);
         const currentWeek: WeekType = this.getCurrentWeekTypeForDate(tomorrow);
-        await this.sendOrUpdateDayImage(currentWeek, tomorrow);
-    }
 
+        await this.sendOrUpdateImages(currentWeek, tomorrow);
+    }
+  
     private getCurrentWeekTypeForDate(date: Date): WeekType {
         const reference = new Date(date.getFullYear(), 8, 1);
         const refMonday = new Date(reference);
