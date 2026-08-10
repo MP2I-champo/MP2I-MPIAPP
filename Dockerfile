@@ -7,7 +7,7 @@ RUN apk add --no-cache font-dejavu
 
 COPY package.json pnpm-lock.yaml* ./
 
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 RUN pnpm install --frozen-lockfile
 
 COPY . .
