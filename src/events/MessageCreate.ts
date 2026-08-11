@@ -1,12 +1,18 @@
 import { EmbedBuilder, Events, Message, TextChannel } from 'discord.js';
 import { containsCitation, getCitationsInMessage } from '../utils/citations.js';
 import { isMathTeacherCalypse, setMathTeacherCalypse } from '../utils/mathTeacherCalypse.js';
+import oralConverter from '../systems/OralConverter.js';
 import params from "../../params.json" with {type: 'json'}
 
 export const name = Events.MessageCreate;
 export const once = false;
 export async function execute(message: Message): Promise<void> {
     if (message.author?.bot) return;
+
+    if(message.channelId === params.channels.oral_converter) {
+        await oralConverter.replyInChannel(message);
+        return;
+    }
 
     if (containsCitation(message.content)) {
         const foundCitations = getCitationsInMessage(message.content);

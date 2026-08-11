@@ -3,20 +3,56 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+            network: host
         container_name: mp2iapp
         restart: unless-stopped
         env_file:
             - .env
+        depends_on:
+            - postgres
+    audio-to-text:
+        image: ghcr.io/speaches-ai/speaches:latest-cuda
+        container_name: mp2i-stt
+        environment:
+          - ALLOW_MODEL_DOWNLOAD=true
+          - WHISPER__INFERENCE_DEVICE=cuda
+          - WHISPER__COMPUTE_TYPE=int8
+          - WHISPER__TTL=5
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
+        volumes:
+          - speaches_cache:/root/.cache/huggingface
+        restart: unless-stopped
+    llm-service:
+        image: ollama/ollama:latest
+        container_name: mp2i-ollama
+        volumes:
+          - ollama_storage:/root/.ollama
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
+        restart: unless-stopped
     postgres:
-        image: postgres:15
-        container_name: postgres
-        restart: always
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      image: postgres:15
+      container_name: mp2i-postgres
+      restart: always
+      environment:
+        POSTGRES_USER: ${DATABASE_USER}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        POSTGRES_DB: ${DATABASE_NAME}
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
 
 volumes:
     postgres_data:
+    ollama_storage:
+    speaches_cache:

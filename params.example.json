@@ -1,9 +1,12 @@
 {
-    "weekMessage": true,
+    "ml": "true",
+    "ollama_model": "",
     "channels": {
         "emploiDuTemps": "",
         "chauve": "",
-        "devoirs": ""
+        "devoirs": "",
+        "oral_converter": "",
+        "oral_result": ""
     },
     "emojis": {
         "chauve": "",

@@ -12,6 +12,7 @@
     "license": "MIT",
     "packageManager": "pnpm@10.33.0",
     "dependencies": {
+        "async-mutex": "^0.5.0",
         "discord.js": "^14.27.0",
         "luxon": "^3.7.2",
         "pg": "^8.23.0",

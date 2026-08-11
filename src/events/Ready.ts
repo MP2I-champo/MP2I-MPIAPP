@@ -7,6 +7,7 @@ import buttonHandler from '../handlers/ButtonHandler.js';
 import stringSelectMenuHandler from '../handlers/StringSelectMenuHandler.js';
 import modalHandler from '../handlers/ModalHandler.js';
 import devoirsManager from '../systems/DevoirsManager.js';
+import oralConverter from '../systems/OralConverter.js';
 
 export const name = Events.ClientReady;
 export const once = true;
@@ -24,4 +25,5 @@ export async function execute(client: Client) {
     dailyChauveReminder.init();
     await emploiDuTemps.init();
     await devoirsManager.init();
+    await oralConverter.init();
 }

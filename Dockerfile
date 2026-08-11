@@ -3,7 +3,14 @@ FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache font-dejavu
+RUN apk add --no-cache font-dejavu \
+  texlive \
+  texmf-dist \
+  texmf-dist-latexextra \
+  texmf-dist-mathscience \
+  texmf-dist-fontsrecommended \
+  texmf-dist-fontsextra \
+  texmf-dist-pictures
 
 COPY package.json pnpm-lock.yaml* ./
 
