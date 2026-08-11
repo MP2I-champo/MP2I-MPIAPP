@@ -11,7 +11,7 @@ services:
         depends_on:
             - postgres
     audio-to-text:
-        image: ghcr.io/speaches-ai/speaches:latest
+        image: ghcr.io/speaches-ai/speaches:latest-cpu
         container_name: mp2i-stt
         environment:
           - ALLOW_MODEL_DOWNLOAD=true
