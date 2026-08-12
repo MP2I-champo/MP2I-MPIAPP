@@ -43,12 +43,13 @@ export async function compileLatexToPdfBuffer(rawLatex: string, user: string): P
 \\fancyhf{}
 
 \\lhead{Transcription de l'Oral de ${user}}  
-\\\chead{}                                        
-\rhead{${now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm")}}              
+\\chead{}                                        
+\\rhead{${now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm")}}              
 
-\lfoot{}   
-\cfoot{Document généré par IA, peut contenir des erreurs}                 
-\rfoot{}
+\\lfoot{}   
+\\cfoot{Document généré par IA, peut contenir des erreurs}                 
+\\rfoot{}
+
 \\allowdisplaybreaks
 \\emergencystretch=3em
 \\binoppenalty=300 
