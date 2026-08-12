@@ -125,7 +125,13 @@ class OralConverter {
         body: JSON.stringify({
           model: params.ml.ollama_model,
           system: ollamaSystemPrompt,
-          prompt: transcript,
+          prompt: `Voici la transcription vocale brute à convertir en LaTeX :
+
+<transcription>
+${transcript}
+</transcription>
+
+Applique les consignes de conversion LaTeX sur ce texte.`,
           stream: false,
           options: {
             num_ctx: 2048,
