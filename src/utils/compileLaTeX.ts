@@ -16,7 +16,7 @@ export async function compileLatexToPdfBuffer(rawLatex: string, user: string): P
 
   const now = DateTime.now().setLocale('fr').setZone("Europe/Paris");
   let dateText = now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm");
-  dateText[0].toUpperCase();
+  dateText = dateText.charAt(0).toUpperCase() + dateText.slice(1);
   
   const document = `
 \\documentclass[12pt]{article}
