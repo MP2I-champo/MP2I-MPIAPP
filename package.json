@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc && node scripts/copy-assets.ts",
+        "copy-assets": "node scripts/copy-assets.ts"
     },
     "keywords": [],
     "type": "module",
