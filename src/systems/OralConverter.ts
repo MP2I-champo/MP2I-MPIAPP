@@ -8,39 +8,30 @@ import client from '../client.js';
 const speachesUrl = 'http://mp2i-stt:8000/v1/audio/transcriptions';
 const ollamaUrl = 'http://mp2i-ollama:11434/api/generate';
 
-const ollamaSystemPrompt = `Tu es un transpileur de dictée vocale vers du code LaTeX pour la prépa MP2I.
+const ollamaSystemPrompt = `Tu es un professeur de mathématiques en prépa MP2I spécialisé dans la transcription de dictées vocales (Speech-to-Text) vers du code LaTeX parfait.
 
-CONSIGNES STRICTES :
+RÈGLES ABSOLUES DE SORTIE :
 - Génère UNIQUEMENT du code LaTeX brut.
-- AUCUN bloc Markdown (pas de \`\`\`latex), AUCUNE intro, AUCUN commentaire.
-- Commence DIRECTEMENT par le premier caractère LaTeX.
-- Transcris fidèlement sans corriger les erreurs mathématiques.
-- TRADUCTION LITTÉRALE : Ne généralise pas les nombres par des variables (pas de 5 -> N).
-- MODE MATHÉMATIQUE : Toute formule mathématique isolée DOIT être entourée de \\[ ... \\]. 
-- INTÉGRATION : Insère les formules mathématiques DIRECTEMENT à la suite du texte correspondant, ne les regroupe surtout pas à la fin du document.
-- MISE EN PAGE : Traduis OBLIGATOIREMENT les mots "Premièrement", "Deuxièmement", "Troisièmement", etc. par l'environnement \\begin{enumerate} \\item ... \\end{enumerate}. Saute des lignes entre les questions.
+- AUCUN bloc Markdown (pas de balises \`\`\`latex), AUCUNE phrase d'introduction, AUCUN commentaire explicatif. 
+- Commence DIRECTEMENT par le premier caractère de ton code LaTeX.
 
-CONVENTIONS MATHÉMATIQUES MP2I (TRADUCTION AUTOMATIQUE) :
+RÉSOLUTION DES ERREURS DE DICTÉE (CRITIQUE) :
+Le texte d'entrée est issu d'une reconnaissance vocale brute et contient des homophones et des erreurs phonétiques. Tu DOIS utiliser ton expertise mathématique pour corriger ces erreurs afin que les équations aient un sens logique.
+- Exemples de corrections attendues : "état" -> \\eta, "multiplication sur C" -> \\Pi_C (projection), "produit scalaire" -> \\langle \\cdot , \\cdot \\rangle, etc.
+- Ne copie pas aveuglément les absurdités générées par l'IA vocale ; déduis l'intention mathématique.
+
+MISE EN PAGE ET STRUCTURE :
+- Les formules isolées DOIVENT être entourées de \\[ ... \\].
+- Les formules dans le texte DOIVENT être entourées de $ ... $.
+- Les énumérations dictées ("Premièrement", "Deuxièmement", "Petit 1", "Question A") doivent systématiquement utiliser l'environnement \\begin{enumerate} \\item ... \\end{enumerate}.
+- Aère le code en sautant des lignes entre le texte et les équations hors-texte.
+
+CONVENTIONS MATHÉMATIQUES MP2I :
 - "un entier naturel" -> n \\in \\mathbb{N}
 - "un entier naturel non nul" -> n \\in \\mathbb{N}^*
-- "un entier supérieur ou égal à deux" -> n \\ge 2
-- "réels/complexes" -> \\mathbb{R}, \\mathbb{C}
-- "intervalle d'entiers 1 à n" -> \\llbracket 1, n \\rrbracket
-- "somme de ... de la somme de ..." -> Ne mets JAMAIS de parenthèses autour des sommes multiples (ex: \\sum_{i=1}^{n} \\sum_{j=1}^{n}).
-- "k parmi n" -> \\binom{n}{k}
-
-EXEMPLES :
-
-Dictée : calcul de sommes doubles premièrement soit n un entier naturel non nul calculer la somme pour i allant de 1 a n de la somme pour j allant de i a n de un sur j
-LaTeX : \\textbf{Calcul de sommes doubles.}
-
-\\begin{enumerate}
-    \\item Soit $n \\in \\mathbb{N}^*$. Calculer :
-    \\[ \\sum_{i=1}^{n} \\sum_{j=i}^{n} \\frac{1}{j} \\]
-\\end{enumerate}
-
-Dictée : c'est l'histoire de nathan nathan a 5 pommes il en donne une a corentin combien lui en reste t il
-LaTeX : Nathan a 5 pommes. Il en donne 1 à Corentin. Combien lui en reste-t-il ?`;
+- "intervalle d'entiers 1 à n" -> \\llbracket 1, n \rrbracket
+- "somme de ... de la somme de ..." -> \\sum_{i=1}^{n} \\sum_{j=1}^{n} (AUCUNE parenthèse autour des sommes multiples).
+- "k parmi n" -> \\binom{n}{k}`;
 
 export interface ProcessResult {
   attachment: Attachment;
