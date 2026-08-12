@@ -175,7 +175,7 @@ Applique les consignes de conversion LaTeX sur ce texte. N'oublie pas : AUCUN bl
       logger.info(`Generating LaTeX for transcript: "${transcript}"`);
       const latex = await this.generateLatex(transcript);
 
-      const latexBuffer = await compileLatexToPdfBuffer(latex);
+      const latexBuffer = await compileLatexToPdfBuffer(latex, message.author.displayName);
 
       const pdfAttachment = new AttachmentBuilder(latexBuffer, {name: "oral.pdf"})
 
@@ -209,7 +209,7 @@ Applique les consignes de conversion LaTeX sur ce texte. N'oublie pas : AUCUN bl
     logger.info(`Generating LaTeX for message (${message.id})`);
     try {
       const latex = await this.generateLatex(message.content);
-      const latexBuffer = await compileLatexToPdfBuffer(latex);
+      const latexBuffer = await compileLatexToPdfBuffer(latex, message.author.displayName);
 
       const pdfAttachment = new AttachmentBuilder(latexBuffer, {name: "oral.pdf"})
 

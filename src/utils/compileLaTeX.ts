@@ -3,16 +3,19 @@ import { promisify } from 'node:util';
 import { writeFile, readFile, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { DateTime } from "luxon";
 import logger from './logger.js';
 
 const execFileAsync = promisify(execFile);
 
-export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer> {
+export async function compileLatexToPdfBuffer(rawLatex: string, user: string): Promise<Buffer> {
   const tempDir = await mkdtemp(join(tmpdir(), 'latex-compile-'));
   const texPath = join(tempDir, 'document.tex');
   const pdfPath = join(tempDir, 'document.pdf');
   const logPath = join(tempDir, 'document.log');
 
+  const now = DateTime.now().setLocale('fr');
+  
   const document = `
 \\documentclass[12pt]{article}
 
@@ -22,6 +25,7 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 \\usepackage{mathtools} 
 \\usepackage{stmaryrd} 
 \\usepackage{microtype}
+\\usepackage{fancyhdr}
 
 \\usepackage{mathrsfs} 
 \\usepackage[utf8]{inputenc}
@@ -33,10 +37,22 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 \\usepackage{geometry}
 
 \\geometry{a4paper, margin=2cm}
+\\setlength{\\headheight}{15pt}
 
+\\pagestyle{fancy}
+\\fancyhf{}
+
+\\lhead{Transcription de l'Oral de ${user}}  
+\\\chead{}                                        
+\rhead{${now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm")}}              
+
+\lfoot{}   
+\cfoot{Document généré par IA, peut contenir des erreurs}                 
+\rfoot{}
 \\allowdisplaybreaks
-\\binoppenalty=700 
-\\relpenalty=700
+\\emergencystretch=3em
+\\binoppenalty=300 
+\\relpenalty=300
 
 \\begin{document}
 ${rawLatex}
