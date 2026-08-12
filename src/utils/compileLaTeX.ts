@@ -14,7 +14,9 @@ export async function compileLatexToPdfBuffer(rawLatex: string, user: string): P
   const pdfPath = join(tempDir, 'document.pdf');
   const logPath = join(tempDir, 'document.log');
 
-  const now = DateTime.now().setLocale('fr');
+  const now = DateTime.now().setLocale('fr').setZone("Europe/Paris");
+  let dateText = now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm");
+  dateText[0].toUpperCase();
   
   const document = `
 \\documentclass[12pt]{article}
@@ -42,9 +44,9 @@ export async function compileLatexToPdfBuffer(rawLatex: string, user: string): P
 \\pagestyle{fancy}
 \\fancyhf{}
 
-\\lhead{Transcription de l'Oral de ${user}}  
+\\lhead{Transcription de l'oral de ${user}}  
 \\chead{}                                        
-\\rhead{${now.toFormat("cccc d MMMM yyyy 'à' HH'h'mm")}}              
+\\rhead{${dateText}}              
 
 \\lfoot{}   
 \\cfoot{Document généré par IA, peut contenir des erreurs}                 
@@ -54,6 +56,8 @@ export async function compileLatexToPdfBuffer(rawLatex: string, user: string): P
 \\emergencystretch=3em
 \\binoppenalty=300 
 \\relpenalty=300
+
+\\setlength{\\headwidth}{\\textwidth}
 
 \\begin{document}
 ${rawLatex}
