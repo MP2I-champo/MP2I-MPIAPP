@@ -6,6 +6,7 @@ ENV NODE_ENV=production
 RUN apk add --no-cache font-dejavu \
   texlive \
   texmf-dist \
+  texmf-dist-latexrecommended \
   texmf-dist-latexextra \
   texmf-dist-mathscience \
   texmf-dist-fontsrecommended \

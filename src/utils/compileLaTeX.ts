@@ -21,6 +21,7 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 \\usepackage{amssymb}
 \\usepackage{mathtools} 
 \\usepackage{stmaryrd} 
+\\usepackage{microtype}
 
 \\usepackage{mathrsfs} 
 \\usepackage[utf8]{inputenc}
@@ -29,10 +30,13 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 
 \\usepackage{esint} 
 \\usepackage{physics} 
-\\usepackage[utf8]{inputenc}
 \\usepackage{geometry}
 
 \\geometry{a4paper, margin=2cm}
+
+\\allowdisplaybreaks
+\\binoppenalty=700 
+\\relpenalty=700
 
 \\begin{document}
 ${rawLatex}
