@@ -17,8 +17,8 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 \\documentclass[12pt]{article}
 
 \\usepackage{amsmath}
-\\usepackage{amssymb}
 \\usepackage{amsfonts}
+\\usepackage{amssymb}
 \\usepackage{mathtools} 
 \\usepackage{stmaryrd} 
 
@@ -27,14 +27,11 @@ export async function compileLatexToPdfBuffer(rawLatex: string): Promise<Buffer>
 \\usepackage[T1]{fontenc}
 \\usepackage{lmodern}
 
-\\usepackage{tikz}
-\\usetikzlibrary{arrows.meta, positioning, calc}
 \\usepackage{esint} 
 \\usepackage{physics} 
-\\usepackage{amsmath}
-\\usepackage{amssymb}
 \\usepackage[utf8]{inputenc}
 \\usepackage{geometry}
+
 \\geometry{a4paper, margin=2cm}
 
 \\begin{document}

@@ -8,6 +8,40 @@ import client from '../client.js';
 const speachesUrl = 'http://mp2i-stt:8000/v1/audio/transcriptions';
 const ollamaUrl = 'http://mp2i-ollama:11434/api/generate';
 
+const ollamaSystemPrompt = `Tu es un transpileur de dictée vocale vers du code LaTeX pour la prépa MP2I.
+
+CONSIGNES STRICTES :
+- Génère UNIQUEMENT du code LaTeX brut.
+- AUCUN bloc Markdown (pas de \`\`\`latex), AUCUNE intro, AUCUN commentaire.
+- Commence DIRECTEMENT par le premier caractère LaTeX.
+- Transcris fidèlement sans corriger les erreurs mathématiques.
+- TRADUCTION LITTÉRALE : Ne généralise pas les nombres par des variables (pas de 5 -> N).
+- MODE MATHÉMATIQUE : Toute formule mathématique isolée DOIT être entourée de \\[ ... \\]. 
+- INTÉGRATION : Insère les formules mathématiques DIRECTEMENT à la suite du texte correspondant, ne les regroupe surtout pas à la fin du document.
+- MISE EN PAGE : Traduis OBLIGATOIREMENT les mots "Premièrement", "Deuxièmement", "Troisièmement", etc. par l'environnement \\begin{enumerate} \\item ... \\end{enumerate}. Saute des lignes entre les questions.
+
+CONVENTIONS MATHÉMATIQUES MP2I (TRADUCTION AUTOMATIQUE) :
+- "un entier naturel" -> n \\in \\mathbb{N}
+- "un entier naturel non nul" -> n \\in \\mathbb{N}^*
+- "un entier supérieur ou égal à deux" -> n \\ge 2
+- "réels/complexes" -> \\mathbb{R}, \\mathbb{C}
+- "intervalle d'entiers 1 à n" -> \\llbracket 1, n \\rrbracket
+- "somme de ... de la somme de ..." -> Ne mets JAMAIS de parenthèses autour des sommes multiples (ex: \\sum_{i=1}^{n} \\sum_{j=1}^{n}).
+- "k parmi n" -> \\binom{n}{k}
+
+EXEMPLES :
+
+Dictée : calcul de sommes doubles premièrement soit n un entier naturel non nul calculer la somme pour i allant de 1 a n de la somme pour j allant de i a n de un sur j
+LaTeX : \\textbf{Calcul de sommes doubles.}
+
+\\begin{enumerate}
+    \\item Soit $n \\in \\mathbb{N}^*$. Calculer :
+    \\[ \\sum_{i=1}^{n} \\sum_{j=i}^{n} \\frac{1}{j} \\]
+\\end{enumerate}
+
+Dictée : c'est l'histoire de nathan nathan a 5 pommes il en donne une a corentin combien lui en reste t il
+LaTeX : Nathan a 5 pommes. Il en donne 1 à Corentin. Combien lui en reste-t-il ?`;
+
 export interface ProcessResult {
   attachment: Attachment;
   transcript: string;
@@ -74,6 +108,8 @@ class OralConverter {
       formData.append('file', blob, filename);
       formData.append('model', 'deepdml/faster-whisper-large-v3-turbo-ct2');
       formData.append('language', 'fr');
+      formData.append('temperature', '0.0');
+      formData.append('vad_filter', 'true');
 
       const res = await fetch(speachesUrl, {
         method: 'POST',
@@ -92,46 +128,12 @@ class OralConverter {
 
   private async generateLatex(transcript: string): Promise<string> {
     return await this.llmMutex.runExclusive(async () => {
-      const systemPrompt = `Tu es un transpileur de dictée vocale vers du code LaTeX pour la prépa MP2I.
-
-CONSIGNES STRICTES :
-- Génère UNIQUEMENT du code LaTeX brut.
-- AUCUN bloc Markdown (pas de \`\`\`latex), AUCUNE intro, AUCUN commentaire.
-- Commence DIRECTEMENT par le premier caractère LaTeX.
-- Transcris fidèlement sans corriger les erreurs mathématiques.
-- TRADUCTION LITTÉRALE : Ne généralise pas les nombres par des variables (pas de 5 -> N).
-- MODE MATHÉMATIQUE : Toute formule mathématique isolée DOIT être entourée de \\[ ... \\]. 
-- INTÉGRATION : Insère les formules mathématiques DIRECTEMENT à la suite du texte correspondant, ne les regroupe surtout pas à la fin du document.
-- MISE EN PAGE : Traduis OBLIGATOIREMENT les mots "Premièrement", "Deuxièmement", "Troisièmement", etc. par l'environnement \\begin{enumerate} \\item ... \\end{enumerate}. Saute des lignes entre les questions.
-
-CONVENTIONS MATHÉMATIQUES MP2I (TRADUCTION AUTOMATIQUE) :
-- "un entier naturel" -> n \\in \\mathbb{N}
-- "un entier naturel non nul" -> n \\in \\mathbb{N}^*
-- "un entier supérieur ou égal à deux" -> n \\ge 2
-- "réels/complexes" -> \\mathbb{R}, \\mathbb{C}
-- "intervalle d'entiers 1 à n" -> \\llbracket 1, n \\rrbracket
-- "somme de ... de la somme de ..." -> Ne mets JAMAIS de parenthèses autour des sommes multiples (ex: \\sum_{i=1}^{n} \\sum_{j=1}^{n}).
-- "k parmi n" -> \\binom{n}{k}
-
-EXEMPLES :
-
-Dictée : calcul de sommes doubles premièrement soit n un entier naturel non nul calculer la somme pour i allant de 1 a n de la somme pour j allant de i a n de un sur j
-LaTeX : \\textbf{Calcul de sommes doubles.}
-
-\\begin{enumerate}
-    \\item Soit $n \\in \\mathbb{N}^*$. Calculer :
-    \\[ \\sum_{i=1}^{n} \\sum_{j=i}^{n} \\frac{1}{j} \\]
-\\end{enumerate}
-
-Dictée : c'est l'histoire de nathan nathan a 5 pommes il en donne une a corentin combien lui en reste t il
-LaTeX : Nathan a 5 pommes. Il en donne 1 à Corentin. Combien lui en reste-t-il ?
-`;
       const res = await fetch(ollamaUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: params.ollama_model,
-          system: systemPrompt,
+          model: params.ml.ollama_model,
+          system: ollamaSystemPrompt,
           prompt: transcript,
           stream: false,
           options: {

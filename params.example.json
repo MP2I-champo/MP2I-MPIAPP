@@ -1,6 +1,7 @@
 {
-    "ml": "true",
-    "ollama_model": "",
+    "ml": {
+        "ollama_model": "",
+    },
     "channels": {
         "emploiDuTemps": "",
         "chauve": "",
