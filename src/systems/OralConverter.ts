@@ -24,9 +24,9 @@ const speachesUrl = 'http://mp2i-stt:8000/v1/audio/transcriptions';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const promptsPath = join(__dirname, '../prompts');
+const promptsPath = join(__dirname, '../../prompts');
 
-const templatePath = join(__dirname, '../templates', 'document.tex');
+const templatePath = join(__dirname, '../../templates', 'document.tex');
 const sttPromptPath = join(promptsPath, 'stt-prompt.md');
 const latexSystemPromptPath = join(promptsPath, 'latex-system.md');
 const latexUserPromptPath = join(promptsPath, 'latex-user.md');
